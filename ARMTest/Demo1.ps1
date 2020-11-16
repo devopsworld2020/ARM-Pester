@@ -1,12 +1,5 @@
 ## region demo
 $demoPath = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 
-## JSON file we created
-ise "$demoPath\VM.Temp.json"
-
-## Pester test template created earlier
-ise "$demoPath\InfrastuctureTests.ps1"
-
 ## Run the example Pester test reading JSON values
-Invoke-Pester "$demoPath\InfrastuctureTests.ps1" -OutputFile "$demoPath\TestResults.xml"  -OutputFormat NUnitXml
-ise '$demoPath\TestResults.xml'
+Invoke-Pester "$demoPath\Test.ARMTemplate.Tests.ps1" -OutputFile "$demoPath\TestResults.xml"  -OutputFormat NUnitXml
