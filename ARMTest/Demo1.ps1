@@ -1,5 +1,5 @@
 ## region demo
-$demoPath = 'C:\sandbox\ARM-pester-01\armtemp'
+$demoPath = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 
 ## JSON file we created
 ise "$demoPath\VM.Temp.json"
