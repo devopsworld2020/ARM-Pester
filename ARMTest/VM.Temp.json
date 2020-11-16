@@ -1,0 +1,284 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "location": {
+          "defaultValue": "[resourceGroup().location]",
+          "type": "String"
+      },
+      "networkSecurityGroupRules": {
+          "defaultValue": [
+              {
+                  "name": "default-allow-ssh",
+                  "properties": {
+                      "priority": 1000,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "22"
+                  }
+              },
+              {
+                  "name": "allow-9000",
+                  "properties": {
+                      "priority": 1010,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "9000"
+                  }
+              },
+              {
+                  "name": "allow-3000",
+                  "properties": {
+                      "priority": 1020,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "3000"
+                  }
+              },
+              {
+                  "name": "allow-3337",
+                  "properties": {
+                      "priority": 1030,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "3337"
+                  }
+              },
+              {
+                  "name": "allow-8180",
+                  "properties": {
+                      "priority": 1040,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "8180"
+                  }
+              }
+          ],
+          "type": "Array"
+      },
+      "subnetName": {
+          "defaultValue": "default",
+          "type": "String"
+      },
+      "virtualNetworkName": {
+          "defaultValue": "qea-vnet",
+          "type": "String"
+      },
+      "addressPrefixes": {
+          "defaultValue": [
+              "10.2.0.0/24"
+          ],
+          "type": "Array"
+      },
+      "subnets": {
+          "defaultValue": [
+              {
+                  "name": "default",
+                  "properties": {
+                      "addressPrefix": "10.2.0.0/24"
+                  }
+              }
+          ],
+          "type": "Array"
+      },
+      "publicIpAddressType": {
+          "defaultValue": "Dynamic",
+          "type": "String"
+      },
+      "virtualMachineName": {
+          "type": "String"
+      },
+      "osDiskType": {
+          "defaultValue": "StandardSSD_LRS",
+          "type": "String"
+      },
+      "virtualMachineSize": {
+          "defaultValue": "Standard_B2s",
+          "type": "String"
+      },
+      "adminUsername": {
+          "defaultValue": "qeaadmin",
+          "type": "String"
+      },
+      "authenticationType": {
+          "defaultValue": "sshPublicKey",
+          "allowedValues": [
+              "sshPublicKey",
+              "password"
+          ],
+          "type": "String",
+          "metadata": {
+              "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+          }
+      },
+      "adminPasswordOrKey": {
+          "type": "SecureString",
+          "metadata": {
+              "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+          }
+      }
+  },
+  "variables": {
+      "lower_case_vm_name": "[toLower(parameters('virtualMachineName'))]",
+      "networkInterfaceName": "[concat('nic-',variables('lower_case_vm_name'))]",
+      "publicIpAddressSku": "Basic",
+      "publicIpAddressName": "[concat('pip-',variables('lower_case_vm_name'))]",
+      "networkSecurityGroupName": "[concat('nsg-snet-',variables('lower_case_vm_name'))]",
+      "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+      "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+      "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+      "linuxConfiguration": {
+          "disablePasswordAuthentication": true,
+          "ssh": {
+              "publicKeys": [
+                  {
+                      "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                      "keyData": "[parameters('adminPasswordOrKey')]"
+                  }
+              ]
+          }
+      }
+  },
+  "resources": [
+      {
+          "type": "Microsoft.Network/networkInterfaces",
+          "apiVersion": "2018-10-01",
+          "name": "[variables('networkInterfaceName')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+              "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+              "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+              "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+          ],
+          "properties": {
+              "ipConfigurations": [
+                  {
+                      "name": "ipconfig1",
+                      "properties": {
+                          "subnet": {
+                              "id": "[variables('subnetRef')]"
+                          },
+                          "privateIPAllocationMethod": "Dynamic",
+                          "publicIpAddress": {
+                              "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                          }
+                      }
+                  }
+              ],
+              "networkSecurityGroup": {
+                  "id": "[variables('nsgId')]"
+              }
+          }
+      },
+      {
+          "type": "Microsoft.Network/networkSecurityGroups",
+          "apiVersion": "2019-02-01",
+          "name": "[variables('networkSecurityGroupName')]",
+          "location": "[parameters('location')]",
+          "properties": {
+              "securityRules": "[parameters('networkSecurityGroupRules')]"
+          }
+      },
+      {
+          "type": "Microsoft.Network/virtualNetworks",
+          "apiVersion": "2019-09-01",
+          "name": "[parameters('virtualNetworkName')]",
+          "location": "[parameters('location')]",
+          "properties": {
+              "addressSpace": {
+                  "addressPrefixes": "[parameters('addressPrefixes')]"
+              },
+              "subnets": "[parameters('subnets')]"
+          }
+      },
+      {
+          "type": "Microsoft.Network/publicIpAddresses",
+          "apiVersion": "2019-02-01",
+          "name": "[variables('publicIpAddressName')]",
+          "location": "[parameters('location')]",
+          "sku": {
+              "name": "[variables('publicIpAddressSku')]"
+          },
+          "properties": {
+              "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+          }
+      },
+      {
+          "type": "Microsoft.Compute/virtualMachines",
+          "apiVersion": "2020-06-01",
+          "name": "[parameters('virtualMachineName')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+              "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+          ],
+          "properties": {
+              "hardwareProfile": {
+                  "vmSize": "[parameters('virtualMachineSize')]"
+              },
+              "storageProfile": {
+                  "osDisk": {
+                      "createOption": "fromImage",
+                      "managedDisk": {
+                          "storageAccountType": "[parameters('osDiskType')]"
+                      }
+                  },
+                  "imageReference": {
+                      "publisher": "Canonical",
+                      "offer": "UbuntuServer",
+                      "sku": "18.04-LTS",
+                      "version": "latest"
+                  }
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                      }
+                  ]
+              },
+              "osProfile": {
+                  "computerName": "[parameters('virtualMachineName')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPasswordOrKey')]",
+                  "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+              }
+          }
+      }
+  ],
+  "outputs": {
+      "adminUsername": {
+          "type": "String",
+          "value": "[parameters('adminUsername')]"
+      }
+  }
+}

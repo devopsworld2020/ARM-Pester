@@ -1,0 +1,130 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "location": {
+          "value": "eastus"
+      },
+      "networkSecurityGroupRules": {
+          "value": [
+              {
+                  "name": "default-allow-ssh",
+                  "properties": {
+                      "priority": 1000,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "22"
+                  }
+              },
+              {
+                  "name": "allow-9000",
+                  "properties": {
+                      "priority": 1010,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "9000"
+                  }
+              },
+              {
+                  "name": "allow-3000",
+                  "properties": {
+                      "priority": 1020,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "3000"
+                  }
+              },
+              {
+                  "name": "allow-3337",
+                  "properties": {
+                      "priority": 1030,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "3337"
+                  }
+              },
+              {
+                  "name": "allow-8180",
+                  "properties": {
+                      "priority": 1040,
+                      "protocol": "TCP",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceApplicationSecurityGroups": [],
+                      "destinationApplicationSecurityGroups": [],
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "8180"
+                  }
+              }
+          ]
+      },
+      "subnetName": {
+          "value": "default"
+      },
+      "virtualNetworkName": {
+          "value": "qea-vnet"
+      },
+      "addressPrefixes": {
+          "value": [
+              "10.2.0.0/24"
+          ]
+      },
+      "subnets": {
+          "value": [
+              {
+                  "name": "default",
+                  "properties": {
+                      "addressPrefix": "10.2.0.0/24"
+                  }
+              }
+          ]
+      },
+      "publicIpAddressType": {
+          "value": "Dynamic"
+      },
+      "virtualMachineName": {
+          "value": "qeavm"
+      },
+      "osDiskType": {
+          "value": "StandardSSD_LRS"
+      },
+      "virtualMachineSize": {
+          "value": "Standard_B2s"
+      },
+      "adminUsername": {
+          "value": "azureuser"
+      },
+      "authenticationType": {
+          "value": "sshPublicKey"
+      },
+      "adminPasswordOrKey": {
+          "value": ""
+      }
+  }
+}
