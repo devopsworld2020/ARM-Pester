@@ -1,4 +1,4 @@
-$resourceGroup = "InfrastructureTesting"
+$resourceGroup = "azureexperiencelab"
 
 Describe "Resource Group tests" -tag "AzureInfrastructure" {
     
